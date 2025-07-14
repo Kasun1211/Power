@@ -1,0 +1,185 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Power and Amps Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white min-h-screen flex items-center justify-center p-4">
+  <div class="max-w-xs w-full border-2 border-[#0a2439] p-4 space-y-6">
+    <div>
+      <label for="wattInput" class="block mb-2 text-base font-normal text-black">Add Value to Selected Field</label>
+      <div class="flex gap-2 border border-[#0a2439] p-2 rounded">
+        <input id="wattInput" type="number" min="0" class="w-20 border border-[#0a2439] px-2 py-1 text-base font-normal text-black rounded" />
+        <button id="addWattBtn" class="border border-[#0a2439] px-3 py-1 text-base font-normal text-black hover:bg-[#0a2439] hover:text-white transition rounded">Add</button>
+        <button id="clearBtn" class="border border-red-600 px-3 py-1 text-base font-normal text-red-600 hover:bg-red-600 hover:text-white transition rounded">Clear</button>
+      </div>
+    </div>
+
+    <div class="flex justify-between items-center border-2 border-[#0a2439] px-4 py-2 rounded">
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input type="radio" name="fieldSelect" id="chkPower" class="w-4 h-4 border-[#0a2439]" />
+        <span class="text-base font-normal text-black">Power in Watts</span>
+      </label>
+      <input id="power" type="text" readonly class="w-20 text-right text-base font-normal text-black border border-[#0a2439] px-1 py-0.5 bg-white rounded" value="0W" />
+    </div>
+    <div class="flex justify-between items-center border-2 border-[#0a2439] px-4 py-2 rounded">
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input type="radio" name="fieldSelect" id="chk12v" class="w-4 h-4 border-[#0a2439]" />
+        <span class="text-base font-normal text-black">Amps at 12v</span>
+      </label>
+      <input id="amps12" type="text" readonly class="w-20 text-right text-base font-normal text-black border border-[#0a2439] px-1 py-0.5 bg-white rounded" value="0 Amp" />
+    </div>
+    <div class="flex justify-between items-center border-2 border-[#0a2439] px-4 py-2 rounded">
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input type="radio" name="fieldSelect" id="chk230v" class="w-4 h-4 border-[#0a2439]" />
+        <span class="text-base font-normal text-black">Amps at 230v</span>
+      </label>
+      <input id="amps230" type="text" readonly class="w-20 text-right text-base font-normal text-black border border-[#0a2439] px-1 py-0.5 bg-white rounded" value="0 Amp" />
+    </div>
+
+    <div class="flex flex-col border-2 border-[#0a2439] p-4 rounded">
+      <label for="batteryCapacity" class="text-base font-normal text-black mb-2">Battery Capacity (Ah at 12v)</label>
+      <input id="batteryCapacity" type="number" min="0" step="any" value="460" class="border border-[#0a2439] px-2 py-1 text-base font-normal text-black rounded" />
+    </div>
+
+    <div class="border-2 border-[#0a2439] p-4 rounded space-y-3">
+      <h3 class="text-base font-semibold text-black mb-2">Estimated Run Time</h3>
+      <div class="flex justify-between">
+        <span class="text-base font-normal text-black">Run time at 12v:</span>
+        <span id="runtime12v" class="text-base font-normal text-black">0 hours</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const wattInput = document.getElementById('wattInput');
+      const addWattBtn = document.getElementById('addWattBtn');
+      const clearBtn = document.getElementById('clearBtn');
+
+      const powerInput = document.getElementById('power');
+      const amps12Input = document.getElementById('amps12');
+      const amps230Input = document.getElementById('amps230');
+
+      const chkPower = document.getElementById('chkPower');
+      const chk12v = document.getElementById('chk12v');
+      const chk230v = document.getElementById('chk230v');
+
+      const batteryCapacityInput = document.getElementById('batteryCapacity');
+
+      const runtime12vSpan = document.getElementById('runtime12v');
+
+      // Store values separately for each field
+      let powerValues = [];
+      let amps12Values = [];
+      let amps230Values = [];
+
+      function updateRunTime(totalPower) {
+        const batteryAh = parseFloat(batteryCapacityInput.value);
+        if (isNaN(batteryAh) || batteryAh <= 0 || totalPower <= 0) {
+          runtime12vSpan.textContent = '0 hours';
+          return;
+        }
+
+        // Battery voltage is 12v (fixed)
+        // Run time (hours) = Battery capacity (Ah) / Load current (A)
+
+        // Load current at 12v = totalPower / 12
+        const loadCurrent12v = totalPower / 12;
+        const runTime12v = loadCurrent12v > 0 ? (batteryAh / loadCurrent12v).toFixed(2) : 0;
+
+        runtime12vSpan.textContent = runTime12v + ' hours';
+      }
+
+      function updateFields() {
+        // Calculate totals for each field
+        const totalPower = powerValues.reduce((a,b) => a+b, 0);
+        const total12v = amps12Values.reduce((a,b) => a+b, 0);
+        const total230v = amps230Values.reduce((a,b) => a+b, 0);
+
+        // Update power field
+        powerInput.value = totalPower + 'W';
+
+        // Update amps 12v field
+        amps12Input.value = total12v + ' Amp';
+
+        // Update amps 230v field
+        amps230Input.value = total230v + ' Amp';
+
+        // Sync fields based on selected radio
+
+        if(chkPower.checked) {
+          // Use power as source, update amps fields accordingly
+          const amps12 = totalPower > 0 ? (totalPower / 12).toFixed(1) : '0';
+          const amps230 = totalPower > 0 ? (totalPower / 230).toFixed(1) : '0';
+          amps12Input.value = amps12 + ' Amp';
+          amps230Input.value = amps230 + ' Amp';
+          amps12Values = [parseFloat(amps12)];
+          amps230Values = [parseFloat(amps230)];
+          updateRunTime(totalPower);
+        } else if(chk12v.checked) {
+          // Use amps12 as source, update power and amps230
+          const powerFrom12 = total12v * 12;
+          const amps230From12 = powerFrom12 / 230;
+          powerInput.value = powerFrom12 + 'W';
+          amps230Input.value = amps230From12.toFixed(1) + ' Amp';
+          powerValues = [powerFrom12];
+          amps230Values = [parseFloat(amps230From12.toFixed(1))];
+          updateRunTime(powerFrom12);
+        } else if(chk230v.checked) {
+          // Use amps230 as source, update power and amps12
+          const powerFrom230 = total230v * 230;
+          const amps12From230 = powerFrom230 / 12;
+          powerInput.value = powerFrom230 + 'W';
+          amps12Input.value = amps12From230.toFixed(1) + ' Amp';
+          powerValues = [powerFrom230];
+          amps12Values = [parseFloat(amps12From230.toFixed(1))];
+          updateRunTime(powerFrom230);
+        } else {
+          // No radio selected, just show sums as is and run time based on power sum
+          updateRunTime(totalPower);
+        }
+      }
+
+      addWattBtn.addEventListener('click', () => {
+        const val = parseFloat(wattInput.value);
+        if (isNaN(val) || val < 0) return;
+
+        if(chkPower.checked) {
+          powerValues.push(val);
+        } else if(chk12v.checked) {
+          amps12Values.push(val);
+        } else if(chk230v.checked) {
+          amps230Values.push(val);
+        } else {
+          // If none selected, add to power by default
+          powerValues.push(val);
+        }
+
+        updateFields();
+        wattInput.value = '';
+        wattInput.focus();
+      });
+
+      clearBtn.addEventListener('click', () => {
+        powerValues = [];
+        amps12Values = [];
+        amps230Values = [];
+        powerInput.value = '0W';
+        amps12Input.value = '0 Amp';
+        amps230Input.value = '0 Amp';
+        runtime12vSpan.textContent = '0 hours';
+        wattInput.value = '';
+        wattInput.focus();
+      });
+
+      batteryCapacityInput.addEventListener('input', () => {
+        // Recalculate run time on battery capacity change
+        const totalPower = powerValues.reduce((a,b) => a+b, 0);
+        updateRunTime(totalPower);
+      });
+    });
+  </script>
+</body>
+</html>
