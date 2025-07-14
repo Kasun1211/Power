@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power and Amps Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f4f8;
+    }
+    .calculator-container {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .header-icon {
+      background-color: #0a2439;
+      color: white;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .border-primary {
+      border-color: #0a2439;
+    }
+    .bg-primary {
+      background-color: #0a2439;
+    }
+    .text-primary {
+      color: #0a2439;
+    }
+    .hover\:bg-primary:hover {
+      background-color: #0a2439;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+  <div class="calculator-container bg-white max-w-md w-full border-2 border-primary rounded-lg overflow-hidden">
+    <div class="bg-primary p-4 text-white flex items-center gap-4">
+      <div class="header-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold">Power Calculator</h1>
+        <p class="text-sm opacity-80">Calculate power, amps, and runtime</p>
+      </div>
+    </div>
+
+    <div class="p-6 space-y-6">
+      <div class="space-y-2">
+        <label for="wattInput" class="block text-sm font-medium text-gray-700">Add value to selected field</label>
+        <div class="flex gap-2">
+          <input
+            id="wattInput"
+            type="number"
+            min="0"
+            step="any"
+            placeholder="Enter value"
+            class="flex-1 border border-primary px-3 py-2 rounded focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+          <button
+            id="addWattBtn"
+            class="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90 transition"
+          >
+            Add
+          </button>
+          <button
+            id="clearBtn"
+            class="border border-red-500 text-red-500 px-4 py-2 rounded hover:bg-red-500 hover:text-white transition"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="flex items-center justify-between p-3 border border-primary rounded">
+          <label class="flex items-center space-x-3 cursor-pointer">
+            <input type="radio" name="fieldSelect" id="chkPower" class="h-4 w-4 border-primary">
+            <span class="text-sm font-medium">Power in Watts</span>
+          </label>
+          <input
+            id="power"
+            type="text"
+            readonly
+            class="w-24 text-right font-medium border-b border-primary px-2 py-1 focus:outline-none bg-transparent"
+            value="0 W"
+          >
+        </div>
+
+        <div class="flex items-center justify-between p-3 border border-primary rounded">
+          <label class="flex items-center space-x-3 cursor-pointer">
+            <input type="radio" name="fieldSelect" id="chk12v" class="h-4 w-4 border-primary">
+            <span class="text-sm font-medium">Amps at 12V</span>
+          </label>
+          <input
+            id="amps12"
+            type="text"
+            readonly
+            class="w-24 text-right font-medium border-b border-primary px-2 py-1 focus:outline-none bg-transparent"
+            value="0 A"
+          >
+        </div>
+
+        <div class="flex items-center justify-between p-3 border border-primary rounded">
+          <label class="flex items-center space-x-3 cursor-pointer">
+            <input type="radio" name="fieldSelect" id="chk230v" class="h-4 w-4 border-primary">
+            <span class="text-sm font-medium">Amps at 230V</span>
+          </label>
+          <input
+            id="amps230"
+            type="text"
+            readonly
+            class="w-24 text-right font-medium border-b border-primary px-2 py-1 focus:outline-none bg-transparent"
+            value="0 A"
+          >
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <label for="batteryCapacity" class="block text-sm font-medium text-gray-700">Battery Capacity (Ah at 12V)</label>
+        <div class="flex items-center gap-2">
+          <input
+            id="batteryCapacity"
+            type="number"
+            min="0"
+            step="any"
+            value="460"
+            class="flex-1 border border-primary px-3 py-2 rounded focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+          <span class="text-sm">Ah</span>
+        </div>
+      </div>
+
+      <div class="bg-gray-50 p-4 rounded border border-primary space-y-2">
+        <h3 class="font-semibold text-primary">Estimated Runtime</h3>
+        <div class="flex justify-between items-center">
+          <span class="text-sm">Run time at 12V:</span>
+          <span id="runtime12v" class="font-medium">0 hours</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // DOM Elements
+      const wattInput = document.getElementById('wattInput');
+      const addWattBtn = document.getElementById('addWattBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const powerInput = document.getElementById('power');
+      const amps12Input = document.getElementById('amps12');
+      const amps230Input = document.getElementById('amps230');
+      const chkPower = document.getElementById('chkPower');
+      const chk12v = document.getElementById('chk12v');
+      const chk230v = document.getElementById('chk230v');
+      const batteryCapacityInput = document.getElementById('batteryCapacity');
+      const runtime12vSpan = document.getElementById('runtime12v');
+
+      // Data storage - Now we maintain a single total power
+      let totalPower = 0;
+
+      // Select Power radio by default
+      chkPower.checked = true;
+
+      // Functions
+      function updateRunTime(currentTotalPower) {
+        const batteryAh = parseFloat(batteryCapacityInput.value);
+        if (isNaN(batteryAh) || batteryAh <= 0 || currentTotalPower <= 0) {
+          runtime12vSpan.textContent = '0 hours';
+          return;
+        }
+
+        const loadCurrent12v = currentTotalPower / 12; // Load current at 12V
+        const runTime12v = batteryAh / loadCurrent12v;
+
+        // Format runtime display
+        if (runTime12v >= 24) {
+          const days = Math.floor(runTime12v / 24);
+          const hours = Math.round(runTime12v % 24);
+          runtime12vSpan.textContent = `${days}d ${hours}h`;
+        } else if (runTime12v >= 1) {
+          runtime12vSpan.textContent = `${runTime12v.toFixed(2)} hours`;
+        } else {
+          const minutes = Math.round(runTime12v * 60);
+          runtime12vSpan.textContent = `${minutes} minutes`;
+        }
+      }
+
+      function updateFields() {
+        // Always calculate amps based on the current totalPower
+        const amps12 = totalPower > 0 ? (totalPower / 12).toFixed(2) : '0.00';
+        const amps230 = totalPower > 0 ? (totalPower / 230).toFixed(2) : '0.00';
+
+        // Update display for all fields
+        powerInput.value = totalPower.toFixed(2) + ' W';
+        amps12Input.value = amps12 + ' A';
+        amps230Input.value = amps230 + ' A';
+
+        // Update run time based on the total power
+        updateRunTime(totalPower);
+      }
+
+      addWattBtn.addEventListener('click', () => {
+        const val = parseFloat(wattInput.value);
+        if (isNaN(val) || val < 0) {
+          wattInput.focus();
+          return;
+        }
+
+        if(chkPower.checked) {
+          totalPower += val; // Add to total power
+        } else if(chk12v.checked) {
+          totalPower += (val * 12); // Convert Amps at 12V to Watts and add
+        } else if(chk230v.checked) {
+          totalPower += (val * 230); // Convert Amps at 230V to Watts and add
+        } else {
+          // If no radio selected, add to power by default
+          totalPower += val;
+        }
+
+        updateFields(); // Recalculate and update all display fields
+        wattInput.value = '';
+        wattInput.focus();
+      });
+
+      clearBtn.addEventListener('click', () => {
+        totalPower = 0; // Reset total power
+        powerInput.value = '0 W';
+        amps12Input.value = '0 A';
+        amps230Input.value = '0 A';
+        runtime12vSpan.textContent = '0 hours';
+        wattInput.value = '';
+        wattInput.focus();
+        chkPower.checked = true; // Reset radio button selection on clear
+        updateFields(); // Ensure all fields update to zero
+      });
+
+      // Event listeners for radio buttons to update fields when selection changes
+      // No explicit action needed here beyond just ensuring updateFields is called,
+      // as updateFields now uses the single totalPower as the source of truth.
+      chkPower.addEventListener('change', updateFields);
+      chk12v.addEventListener('change', updateFields);
+      chk230v.addEventListener('change', updateFields);
+
+      batteryCapacityInput.addEventListener('input', () => {
+        // Recalculate run time on battery capacity change
+        updateRunTime(totalPower); // Use the current totalPower for runtime
+      });
+
+      // Initial update to set default values and run time on page load
+      updateFields();
+    });
+  </script>
+</body>
+</html>
